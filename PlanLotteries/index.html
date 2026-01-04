@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planet Lotteries - Global Jackpot Winners</title>
+  
+  <!-- Fuentes Modernas -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Librería Swiper (Slider) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  
+  <style>
+    /* =========================================
+       1. CORE MODERN THEME (PLANET + LUCKY)
+       ========================================= */
+    :root {
+      --bg-deep: #0a0e17;
+      --card-bg: #161b28;
+      --text-main: #ffffff;
+      --neon-blue: #00e5ff;
+      --neon-gold: #ffcc00;
+      --neon-pink: #ff66c4;
+      --accent-green: #00ff88;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* =========================================
+       2. NAV BAR GRADIENT (LUCKY SEVEN STYLE)
+       ========================================= */
+    .nav--gradient {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      color: #fff;
+      /* Lucky Seven Animated Gradient */
+      background: linear-gradient(120deg,#0047ba,#38b6ff,#ff66c4,#f7ec06);
+      background-size: 260% 260%;
+      animation: navGradient 16s ease infinite;
+      border-top: 4px solid var(--neon-gold);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+    }
+
+    @keyframes navGradient {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .nav-wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 14px 16px 18px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      column-gap: 24px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: #fff; }
+    .brand-text { font-weight: 800; font-size: 1.2rem; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+    
+    /* Nav Links */
+    .nav-links { display: flex; align-items: center; justify-content: center; gap: 22px; }
+    .nav-links a {
+      position: relative; font-size: 0.95rem; font-weight: 600; text-decoration: none; color: #fff;
+      padding-bottom: 6px; letter-spacing: 0.06em; transition: all 0.2s ease;
+    }
+    .nav-links a::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+      border-radius: 999px; background: var(--neon-gold);
+      transform: scaleX(0); transition: transform 0.18s ease-out;
+    }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a:hover { color: var(--neon-gold); transform: translateY(-2px); }
+
+    /* Mobile Hamburger */
+    .nav-toggle { display: none; background: transparent; border: none; cursor: pointer; }
+    .nav-toggle span { display: block; width: 28px; height: 3px; margin: 6px auto; background: #fff; transition: 0.3s; border-radius: 3px; }
+
+    /* Responsive Nav */
+    @media (max-width: 992px) {
+      .nav-links {
+        grid-column: 1 / -1; position: absolute; top: 100%; left: 0; width: 100%;
+        background: #161b28; flex-direction: column; padding: 20px;
+        transform: translateY(-150%); transition: transform 0.3s ease;
+      }
+      .nav-links.active { transform: translateY(0); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+      .nav-toggle { display: block; }
+    }
+
+    /* =========================================
+       3. HERO SLIDER (SWIPER STYLE)
+       ========================================= */
+    .hero-section { max-width: 1300px; margin: 20px auto; padding: 0 20px; }
+    .swiper { width: 100%; height: 400px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,229,255,0.2); }
+    .swiper-slide { display: flex; align-items: center; justify-content: center; background: #222; }
+    .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* =========================================
+       4. DATE BAR
+       ========================================= */
+    .date-bar {
+      max-width: 1180px; margin: 20px auto; background: rgba(255,255,255,0.05);
+      padding: 15px; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 15px;
+      border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+    }
+    input[type="date"] {
+      background: #0a0e17; border: 1px solid var(--neon-blue); color: #fff;
+      padding: 10px 15px; border-radius: 8px; font-family: inherit; font-weight: bold;
+    }
+
+    /* =========================================
+       5. TABS (NEON STYLE)
+       ========================================= */
+    .nav-tabs-container { max-width: 1180px; margin: 0 auto 20px; }
+    .nav-tabs {
+      display: flex; justify-content: center; gap: 15px; padding: 10px;
+      background: #111; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      overflow-x: auto; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .tab-btn {
+      background: transparent; border: none; color: #888; padding: 12px 24px;
+      border-radius: 50px; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      transition: 0.3s; white-space: nowrap; text-transform: uppercase;
+    }
+    .tab-btn.active {
+      background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+      color: #fff; box-shadow: 0 0 15px var(--neon-pink); transform: scale(1.05);
+    }
+    .tab-btn:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.1); }
+
+    /* =========================================
+       6. RESULTS CARDS (FUSION STYLE)
+       ========================================= */
+    .results-container { max-width: 1180px; margin: 0 auto; padding-bottom: 60px; min-height: 60vh; }
+    
+    .game-card {
+      background: var(--card-bg); border-radius: 20px; margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden;
+      position: relative;
+      border-left: 6px solid transparent; /* Color dinámico */
+      transition: transform 0.3s ease;
+    }
+    .game-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+
+    /* Card Header */
+    .game-header {
+      background: rgba(0,0,0,0.3); padding: 15px 25px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .company-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .date-display { font-size: 0.8rem; color: var(--accent-green); font-weight: bold; background: rgba(0,255,136,0.1); padding: 4px 10px; border-radius: 8px; }
+
+    /* Card Body */
+    .draw-row {
+      padding: 25px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap;
+    }
+    .draw-row:last-child { border-bottom: none; }
+
+    .game-logo-img { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+    
+    .info-section { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
+    .game-title { font-size: 1.4em; font-weight: 800; margin: 0; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .jackpot-display { color: var(--neon-gold); font-size: 1.1em; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    .jackpot-display::before { content: "🏆"; filter: grayscale(1) brightness(2); }
+
+    /* BALLS & BOXES */
+    .items-container { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+    
+    .ball {
+      width: 55px; height: 55px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+      color: #000; font-weight: 900; display: flex; justify-content: center; align-items: center; font-size: 1.4em;
+      box-shadow: inset 0 -4px 10px rgba(0,0,0,0.2), 0 4px 10px rgba(255,255,255,0.1); border: 2px solid rgba(0,0,0,0.05);
+    }
+
+    .rd-box {
+      width: 70px; height: 50px; border-radius: 8px; background: #fff; color: #000; font-weight: 900; display: flex; justify-content: center; align-items: center; font-size: 1.3em;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid #333;
+    }
+
+    .pool-ball {
+      width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #fff, var(--neon-gold)); color: #000; font-weight: 900; display: flex; justify-content: center; align-items: center; font-size: 1.6em;
+      box-shadow: 0 0 20px var(--neon-gold); border: 4px solid #fff;
+    }
+
+    /* Color Accents */
+    .border-leidsa { border-left-color: #ffc81c; }
+    .border-king { border-left-color: #2d2d83; }
+    .border-nacional { border-left-color: #53ca5f; }
+    .border-islands { border-left-color: var(--neon-pink); }
+
+    /* =========================================
+       7. WINNERS & CONFETTI (LUCKY SEVEN STYLE)
+       ========================================= */
+    .winners-section { position: relative; max-width: 1180px; margin: 40px auto; border-radius: 20px; overflow: hidden; }
+    .winners-bg { width: 100%; display: block; border-radius: 20px; opacity: 0.3; }
+    
+    .confetti-container { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .confetti { position: absolute; top: -10%; width: 10px; height: 20px; border-radius: 2px; animation: confettiFall linear infinite; transform-origin: center top; }
+    
+    @keyframes confettiFall {
+      0% { transform: translate3d(0, -100px, 0) rotateZ(0deg); }
+      100% { transform: translate3d(0, 110vh, 0) rotateZ(720deg); }
+    }
+
+    /* Colores Confetti */
+    .confetti:nth-child(2n) { background: var(--neon-pink); animation-duration: 4.5s; left: 20%; }
+    .confetti:nth-child(3n) { background: var(--neon-blue); animation-duration: 5.5s; left: 40%; }
+    .confetti:nth-child(4n) { background: var(--accent-green); animation-duration: 4s; left: 60%; }
+    .confetti:nth-child(5n) { background: var(--neon-gold); animation-duration: 6s; left: 80%; }
+
+    .winners-overlay {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85); padding: 30px; border-radius: 20px;
+      border: 2px solid var(--neon-gold); text-align: center; color: #fff;
+      width: 70%; max-width: 600px; box-shadow: 0 0 40px rgba(255, 204, 0, 0.3);
+    }
+
+    .campaign-title { font-size: 2em; font-weight: 900; color: var(--neon-gold); text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 0 10px var(--neon-gold); }
+    .winner-item { font-size: 1.1em; font-weight: 600; margin: 5px 0; color: #fff; animation: winnerGlow 1.5s infinite alternate; }
+    
+    @keyframes winnerGlow {
+      from { text-shadow: 0 0 5px #fff; transform: scale(1); }
+      to { text-shadow: 0 0 15px var(--neon-pink); transform: scale(1.02); }
+    }
+
+    /* =========================================
+       8. FOOTER (GRADIENT STYLE)
+       ========================================= */
+    .footer {
+      background: linear-gradient(120deg,#0047ba,#38b6ff,#ff66c4,#f7ec06);
+      background-size: 260% 260%; animation: navGradient 16s ease infinite;
+      padding: 40px 20px; text-align: center; color: #fff; margin-top: 50px;
+    }
+    .footer-content { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; text-align: left; }
+    .footer h4 { color: #fff; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; }
+    .footer a { color: rgba(255,255,255,0.8); text-decoration: none; display: block; margin: 8px 0; transition: 0.3s; }
+    .footer a:hover { color: #fff; transform: translateX(5px); }
+
+    @media (max-width: 768px) {
+      .game-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .draw-row { flex-direction: column; align-items: flex-start; }
+      .items-container { width: 100%; justify-content: flex-start; }
+      .winners-overlay { width: 90%; padding: 15px; }
+      .campaign-title { font-size: 1.5em; }
+      .winner-item { font-size: 0.9em; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="nav nav--gradient">
+    <div class="container nav-wrap">
+      <!-- Logo -->
+      <a href="#" class="brand">
+        <div style="width:40px; height:40px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#0047ba; font-weight:bold; font-size:20px;">P</div>
+        <span class="brand-text">Planet Lotteries</span>
+      </a>
+
+      <!-- Mobile Toggle -->
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Nav Links -->
+      <nav class="nav-links">
+        <a href="#">Inicio</a>
+        <a href="#">Resultados</a>
+        <a href="#">Jackpots</a>
+        <a href="#">Ganadores</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- SLIDER HERO -->
+  <section class="hero-section">
+    <div class="swiper hero-swiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide"><img src="https://cdn-lottery.kiskoo.com/loterias-dominicanas/63e850adcd8910c986e861e8fbab7d34.png" alt="Banner 1"></div>
+        <div class="swiper-slide"><img src="https://cdn-lottery.kiskoo.com/loterias-dominicanas/63e850adcd8910c986e861e8fbab7d34.png" alt="Banner 2"></div>
+      </div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </section>
+
+  <!-- DATE SELECTOR -->
+  <div class="date-bar">
+    <span style="font-weight: bold; color: var(--neon-blue);">RESULTADOS DE:</span>
+    <input type="date" id="datePicker">
+    <span style="font-size: 0.9em; opacity: 0.8;">HISTORIAL COMPLETO &raquo;</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="nav-tabs-container">
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="openTab('rd')">REP DOM</button>
+      <button class="tab-btn" onclick="openTab('islands')">ISLAS</button>
+      <button class="tab-btn" onclick="openTab('king')">KING LOTTERY</button>
+      <button class="tab-btn" onclick="openTab('usa')">USA / PR</button>
+    </nav>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main id="main-container" class="results-container">
+    <!-- Javascript will inject cards here -->
+  </main>
+
+  <!-- WINNERS SECTION (LUCKY SEVEN STYLE) -->
+  <section class="winners-section">
+    <div class="winners-bg">
+       <!-- Fondo abstracto oscuro -->
+       <div style="width:100%; height:400px; background:#222; background-image: linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a), linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a); background-size: 20px 20px; background-position: 0 0, 10px 10px;"></div>
+    </div>
+    
+    <!-- Confetti Animation (Minimalized) -->
+    <div class="confetti-container">
+      <span class="confetti"></span><span class="confetti"></span><span class="confetti"></span><span class="confetti"></span><span class="confetti"></span>
+      <span class="confetti"></span><span class="confetti"></span><span class="confetti"></span><span class="confetti"></span><span class="confetti"></span>
+    </div>
+
+    <div class="winners-overlay">
+      <div class="campaign-title">Semana del Regalo</div>
+      <div class="winner-item">🎁 Iphone 17 - Maria Perez ****5520</div>
+      <div class="winner-item">💵 XCG 5000 - Juan Rodriguez ****1022</div>
+      <div class="winner-item">🚗 Toyota Yaris - Ana G. ****9991</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div>
+        <h4>PLANET LOTTERIES</h4>
+        <p>La fusión definitiva de resultados globales.</p>
+      </div>
+      <div>
+        <h4>Enlaces</h4>
+        <a href="#">Inicio</a>
+        <a href="#">Estadísticas</a>
+        <a href="#">Jugar</a>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <a href="#">Soporte Técnico</a>
+        <a href="#">Publicidad</a>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 30px; font-size: 0.8em; opacity: 0.8;">
+      &copy; 2026 Planet Lotteries. Fusion of Style & Data.
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  
+  <script>
+    // 1. DATE PICKER LOGIC
+    document.getElementById('datePicker').valueAsDate = new Date();
+
+    function formatNum(n) { return n < 10 ? '0' + n : n; }
+
+    // 2. DATA (Merging Complex Structures)
+    // =========================================
+    // DATA LOGIC (FETCH EXTERNAL FILE)
+    // =========================================
+    
+    let lotteryData = {}; // Variable vacía al inicio
+
+    // Función para cargar los datos del archivo JSON
+    async function loadLotteryData() {
+        try {
+            const response = await fetch('data.json'); // Busca el archivo
+            const data = await response.json();
+            lotteryData = data; // Guarda los datos en la variable
+            
+            // Una vez cargados los datos, renderizamos la pestaña activa
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab) {
+                // Simular un clic para recargar la vista actual
+                activeTab.click();
+            } else {
+                renderResults('rd'); // Carga RD por defecto si no hay selección
+            }
+        } catch (error) {
+            console.error("Error al cargar los resultados:", error);
+            // Si falla (por ejemplo, lo abres directo en el archivo local sin servidor), mostrar error o data dummy
+            alert("Error cargando resultados. Revisa 'data.json'.");
+        }
+    }
+
+    // 1. DATA (ELIMINADO DE AQUI - AHORA ESTA EN DATA.JSON)
+    // El sistema ahora lee el archivo externo automáticamente.
+
+    // 2. RENDER FUNCTION (Enhanced)
+    function renderResults(region) {
+      const container = document.getElementById('main-container');
+      container.innerHTML = ""; // Clear
+
+      const games = lotteryData[region];
+      if (!games) return;
+
+      games.forEach((game, index) => {
+        const card = document.createElement('div');
+        card.className = `game-card ${game.borderClass || ''}`;
+        
+        // Fade in animation staggered
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.5s ease';
+        setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, index * 100);
+
+        // Header con nombre de empresa y fecha
+        const header = document.createElement('div');
+        header.className = 'game-header';
+        header.innerHTML = `
+          <span class="company-name">${game.company}</span>
+          <span class="date-display">HOY</span>
+        `;
+        card.appendChild(header);
+
+        // Dibujar filas de resultados
+        game.draws.forEach(draw => {
+          const row = document.createElement('div');
+          row.className = 'draw-row';
+
+          // 1. LOGO (Como en loteriasdominicanas)
+          if (game.logo) {
+            const img = document.createElement('img');
+            img.src = game.logo;
+            img.className = 'game-logo-img';
+            row.appendChild(img);
+          }
+
+          // 2. INFO (Nombre y Jackpot)
+          const info = document.createElement('div');
+          info.className = 'info-section';
+          
+          const title = document.createElement('div');
+          title.className = 'game-title';
+          title.innerText = game.name;
+          info.appendChild(title);
+
+          if (game.jackpot) {
+            const jp = document.createElement('div');
+            jp.className = 'jackpot-display';
+            jp.innerText = `JACKPOT: ${game.jackpot}`;
+            info.appendChild(jp);
+          }
+
+          row.appendChild(info);
+
+          // 3. NÚMEROS
+          const itemsDiv = document.createElement('div');
+          itemsDiv.className = 'items-container';
+
+          draw.numbers.forEach(num => {
+            let item;
+            if (game.type === "rd_pairs") {
+              item = document.createElement('div');
+              item.className = 'rd-box';
+              item.innerText = num;
+            } 
+            else if (game.type === "king_pool") {
+              item = document.createElement('div');
+              item.className = 'pool-ball';
+              item.innerText = num;
+            }
+            else {
+              item = document.createElement('div');
+              item.className = 'ball';
+              item.innerText = num;
+            }
+            itemsDiv.appendChild(item);
+          });
+
+          row.appendChild(itemsDiv);
+          card.appendChild(row);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // 3. TABS LOGIC
+    function openTab(region) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      renderResults(region);
+    }
+
+    // 4. INIT (CAMBIADO - AHORA CARGA DATOS PRIMERO)
+    document.addEventListener('DOMContentLoaded', () => {
+        loadLotteryData(); // Llama a la función de carga automática
+        
+        // Resto de inicializaciones (Slider, Menú, etc.)...
+        const swiper = new Swiper('.hero-swiper', {
+          loop: true,
+          autoplay: { delay: 3000 },
+          pagination: { el: '.swiper-pagination', clickable: true },
+        });
+        const toggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        toggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+    });
+
+  </script>
+</body>
+</html>
