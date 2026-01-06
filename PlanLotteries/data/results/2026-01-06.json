@@ -1,6 +1,6 @@
 {
   "date": "2026-01-06",
-  "updated_at": "2026-01-06T17:19:46Z",
+  "updated_at": "2026-01-06T18:06:23Z",
   "lotteries": [
     {
       "id": "powerball",
@@ -15,7 +15,7 @@
         "currency": "USD"
       },
       "source": null,
-      "updated_at": "2026-01-06T17:19:46Z"
+      "updated_at": "2026-01-06T18:06:23Z"
     },
     {
       "id": "megamillions",
@@ -30,7 +30,7 @@
         "currency": "USD"
       },
       "source": null,
-      "updated_at": "2026-01-06T17:19:46Z"
+      "updated_at": "2026-01-06T18:06:23Z"
     }
   ]
 }
