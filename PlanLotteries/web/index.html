@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planet Lotteries</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .card { border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; }
+    .title { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+    .muted { color: #666; margin: 0 0 12px; }
+    .nums { font-size: 18px; font-weight: 600; }
+    .error { color: #b00020; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Planet Lotteries</h1>
+  <p class="muted">
+    Última actualización: <span id="updated">---</span>
+  </p>
+
+  <div class="grid">
+    <div class="card" id="powerball-card">
+      <p class="title">Powerball</p>
+      <p class="muted" id="powerball-date">Fecha: ---</p>
+      <p class="nums" id="powerball-nums">Cargando...</p>
+      <p class="muted" id="powerball-jackpot"></p>
+      <p class="muted" id="powerball-source"></p>
+    </div>
+
+    <div class="card" id="mega-card">
+      <p class="title">Mega Millions</p>
+      <p class="muted" id="mega-date">Fecha: ---</p>
+      <p class="nums" id="mega-nums">Cargando...</p>
+      <p class="muted" id="mega-jackpot"></p>
+      <p class="muted" id="mega-source"></p>
+    </div>
+  </div>
+
+  <script>
+    // Como tu GitHub Pages va a servir desde /PlanLotteries,
+    // index.html está en /web, entonces subimos 1 nivel:
+    // /web -> /data/results/latest.json
+    const DATA_URL = "../data/results/latest.json";
+
+    function money(amount, currency) {
+      if (amount == null) return "";
+      try {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: currency || "USD",
+          maximumFractionDigits: 0
+        }).format(amount);
+      } catch {
+        return `${amount} ${currency || ""}`.trim();
+      }
+    }
+
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function renderCard(prefix, item, fallbackTitle) {
+      if (item.error) {
+        setText(prefix + "-nums", "Error cargando datos");
+        const card = document.getElementById(prefix + "-card");
+        if (card) card.classList.add("error");
+        return;
+      }
+
+      const title = item.name || fallbackTitle;
+      const date = item.date || "---";
+      const nums = Array.isArray(item.numbers) ? item.numbers.join(", ") : "";
+      const extra = item.extra && Object.keys(item.extra).length
+        ? " | Extra: " + JSON.stringify(item.extra)
+        : "";
+
+      setText(prefix + "-date", `Fecha: ${date}`);
+      setText(prefix + "-nums", nums ? (`${nums}${extra}`) : "Sin datos aún");
+
+      const jackpot = item.jackpot ? money(item.jackpot.amount, item.jackpot.currency) : "";
+      setText(prefix + "-jackpot", jackpot ? `Jackpot: ${jackpot}` : "");
+
+      if (item.source) {
+        document.getElementById(prefix + "-source").innerHTML =
+          `Fuente: <a href="${item.source}" target="_blank" rel="noopener">${item.source}</a>`;
+      } else {
+        setText(prefix + "-source", "");
+      }
+    }
+
+    fetch(DATA_URL, { cache: "no-store" })
+      .then(r => r.json())
+      .then(data => {
+        setText("updated", data.updated_at || "---");
+
+        const items = Array.isArray(data.lotteries) ? data.lotteries : [];
+
+        const powerball = items.find(x => x.id === "powerball") || {};
+        const mega = items.find(x => x.id === "megamillions") || {};
+
+        renderCard("powerball", powerball, "Powerball");
+        renderCard("mega", mega, "Mega Millions");
+      })
+      .catch(() => {
+        setText("updated", "Error");
+        setText("powerball-nums", "No se pudo cargar latest.json");
+        setText("mega-nums", "No se pudo cargar latest.json");
+      });
+  </script>
+</body>
+</html>

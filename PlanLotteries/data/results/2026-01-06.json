@@ -1,0 +1,36 @@
+{
+  "date": "2026-01-06",
+  "updated_at": "2026-01-06T17:19:46Z",
+  "lotteries": [
+    {
+      "id": "powerball",
+      "country": "US",
+      "state": "NATIONAL",
+      "name": "Powerball",
+      "date": null,
+      "numbers": [],
+      "extra": {},
+      "jackpot": {
+        "amount": null,
+        "currency": "USD"
+      },
+      "source": null,
+      "updated_at": "2026-01-06T17:19:46Z"
+    },
+    {
+      "id": "megamillions",
+      "country": "US",
+      "state": "NATIONAL",
+      "name": "Mega Millions",
+      "date": null,
+      "numbers": [],
+      "extra": {},
+      "jackpot": {
+        "amount": null,
+        "currency": "USD"
+      },
+      "source": null,
+      "updated_at": "2026-01-06T17:19:46Z"
+    }
+  ]
+}
