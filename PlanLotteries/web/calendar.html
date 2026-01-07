@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendario — Planet Lotteries</title>
+  <style>
+    :root { --border:#e7e7e7; --muted:#666; }
+    body { font-family: system-ui, Arial, sans-serif; margin:0; background:#fafafa; color:#111; }
+    header { padding:22px 18px; background:#fff; border-bottom:1px solid var(--border); }
+    .wrap { max-width: 980px; margin:0 auto; padding:18px; }
+    h1 { margin:0; font-size:20px; }
+    .sub { margin:6px 0 0; color:var(--muted); font-size:13px; }
+
+    .topbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+    .btn {
+      display:inline-block; padding:10px 12px; border:1px solid var(--border);
+      border-radius:10px; background:#fff; text-decoration:none; color:#111; font-size:14px;
+    }
+    .btn:hover { background:#f5f5f5; }
+
+    .cal { background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .cal-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+    .cal-head h2 { margin:0; font-size:16px; }
+    .nav { display:flex; gap:8px; }
+    .nav button {
+      padding:8px 10px; border:1px solid var(--border); background:#fff; border-radius:10px; cursor:pointer;
+    }
+    .nav button:hover { background:#f5f5f5; }
+
+    .grid { display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; }
+    .dow { color:var(--muted); font-size:12px; text-align:center; padding:6px 0; }
+    .day {
+      border:1px solid var(--border); border-radius:12px; padding:10px 10px; min-height:64px;
+      background:#fff; position:relative;
+    }
+    .day.muted { background:#fbfbfb; color:#aaa; }
+    .day .num { font-weight:700; }
+    .badge {
+      position:absolute; right:10px; top:10px; font-size:11px; padding:3px 8px;
+      border:1px solid var(--border); border-radius:999px; color:var(--muted); background:#fff;
+    }
+    .has {
+      border-color:#b9e3c6;
+      box-shadow: 0 0 0 2px rgba(34,197,94,0.12) inset;
+      cursor:pointer;
+    }
+    .has:hover { background:#f7fff9; }
+    .legend { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px; color:var(--muted); font-size:13px;}
+    .dot { width:10px; height:10px; border-radius:999px; display:inline-block; border:1px solid var(--border); }
+    footer { margin: 26px 0 10px; text-align:center; color:#777; font-size:12px; }
+    .error { color:#b00020; font-weight:600; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Calendario</h1>
+      <div class="sub">Selecciona un día para ver los resultados guardados.</div>
+
+      <div class="topbar">
+        <a class="btn" href="./index.html">🏠 Home</a>
+        <a class="btn" href="./history.html">📜 Historial</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="cal">
+      <div class="cal-head">
+        <h2 id="monthTitle">---</h2>
+        <div class="nav">
+          <button id="prevBtn" type="button">◀</button>
+          <button id="todayBtn" type="button">Hoy</button>
+          <button id="nextBtn" type="button">▶</button>
+        </div>
+      </div>
+
+      <div class="grid" id="dow">
+        <div class="dow">Dom</div><div class="dow">Lun</div><div class="dow">Mar</div>
+        <div class="dow">Mié</div><div class="dow">Jue</div><div class="dow">Vie</div><div class="dow">Sáb</div>
+      </div>
+      <div class="grid" id="days"></div>
+
+      <div class="legend">
+        <span class="dot" style="background:#fff;"></span> Sin resultados
+        <span class="dot" style="background:rgba(34,197,94,0.12); border-color:#b9e3c6;"></span> Con resultados
+      </div>
+    </div>
+
+    <footer>
+      © 2026 <strong>Planet Lotteries</strong> — All rights reserved.<br>
+      Licensed under AGPL-3.0 · Unauthorized commercial use prohibited.
+    </footer>
+  </main>
+
+  <script>
+    const INDEX_URL = "../data/results/index.json";
+
+    let available = new Set(); // "YYYY-MM-DD"
+    let current = new Date();
+
+    function ymd(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function monthTitle(d) {
+      return d.toLocaleString("es-ES", { month: "long", year: "numeric" });
+    }
+
+    function startOfMonth(d) {
+      return new Date(d.getFullYear(), d.getMonth(), 1);
+    }
+
+    function endOfMonth(d) {
+      return new Date(d.getFullYear(), d.getMonth()+1, 0);
+    }
+
+    function render() {
+      document.getElementById("monthTitle").textContent =
+        monthTitle(current).replace(/^./, c => c.toUpperCase());
+
+      const container = document.getElementById("days");
+      container.innerHTML = "";
+
+      const first = startOfMonth(current);
+      const last = endOfMonth(current);
+
+      // Para alinear: mostrar días desde domingo anterior
+      const start = new Date(first);
+      start.setDate(first.getDate() - first.getDay());
+
+      // 6 semanas (42 celdas)
+      for (let i=0; i<42; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+
+        const inMonth = d.getMonth() === current.getMonth();
+        const key = ymd(d);
+        const has = available.has(key);
+
+        const div = document.createElement("div");
+        div.className = "day" + (inMonth ? "" : " muted") + (has ? " has" : "");
+        div.innerHTML = `
+          <div class="num">${d.getDate()}</div>
+          ${has ? `<div class="badge">OK</div>` : ``}
+        `;
+
+        if (has) {
+          div.addEventListener("click", () => {
+            // abre history filtrado por fecha
+            window.location.href = `./history.html?date=${key}`;
+          });
+        }
+
+        container.appendChild(div);
+      }
+    }
+
+    async function loadIndex() {
+      const r = await fetch(INDEX_URL, { cache: "no-store" });
+      if (!r.ok) throw new Error("No se pudo cargar index.json");
+      const data = await r.json();
+      const dates = Array.isArray(data.dates) ? data.dates : [];
+      available = new Set(dates);
+
+      // Ajusta el mes inicial al más reciente que exista
+      if (dates.length) {
+        const [y,m] = dates[0].split("-").map(Number);
+        current = new Date(y, m-1, 1);
+      }
+      render();
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      current = new Date(current.getFullYear(), current.getMonth()-1, 1);
+      render();
+    });
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      current = new Date(current.getFullYear(), current.getMonth()+1, 1);
+      render();
+    });
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      const t = new Date();
+      current = new Date(t.getFullYear(), t.getMonth(), 1);
+      render();
+    });
+
+    loadIndex().catch(e => {
+      document.getElementById("days").innerHTML = `<div class="error">${e.message}</div>`;
+    });
+  </script>
+</body>
+</html>

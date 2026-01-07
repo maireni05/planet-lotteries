@@ -156,8 +156,17 @@
         const sel = document.getElementById("dateSelect");
         sel.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join("");
 
-        const initial = dates[0] || new Date().toISOString().slice(0,10);
-        sel.value = initial;
+        const params = new URLSearchParams(location.search);
+const paramDate = params.get("date");
+
+const initial = (paramDate && dates.includes(paramDate))
+  ? paramDate
+  : (dates[0] || new Date().toISOString().slice(0,10));
+
+sel.value = initial;
+await render(initial);
+
+        
 
         sel.addEventListener("change", () => render(sel.value));
         document.getElementById("search").addEventListener("input", applySearch);
