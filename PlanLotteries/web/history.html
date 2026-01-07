@@ -92,29 +92,31 @@
     }
 
     function cardHtml(item) {
-      const jp = item.jackpot ? money(item.jackpot.amount, item.jackpot.currency) : null;
+  const jp = item.jackpot ? money(item.jackpot.amount, item.jackpot.currency) : null;
 
-      const extras = [];
-      if (item.extra) {
-        if (item.extra.powerplay) extras.push(`Power Play: <b>${item.extra.powerplay}</b>`);
-        if (item.extra.next_draw_date) extras.push(`Próximo: <b>${item.extra.next_draw_date}</b>`);
-        if (item.extra.multipliers_available) extras.push(`Megaplier: <b>${item.extra.multipliers_available}</b>`);
-      }
+  const extras = [];
+  if (item.extra) {
+    if (item.extra.powerplay) extras.push(`Power Play: <b>${item.extra.powerplay}</b>`);
+    if (item.extra.next_draw_date) extras.push(`Próximo: <b>${item.extra.next_draw_date}</b>`);
+    if (item.extra.multipliers_available) extras.push(`Megaplier: <b>${item.extra.multipliers_available}</b>`);
+  }
 
-      return `
-        <div class="card" data-name="${(item.name || item.id || "").toLowerCase()}">
-          <div class="title">
-            <strong>${item.name || item.id}</strong>
-            <span class="meta">${item.country || ""}${item.state ? " • " + item.state : ""}</span>
-          </div>
-          <div class="meta">Fecha sorteo: ${item.date || "---"}</div>
-          <div class="balls">${ballsHtml(item.numbers)}</div>
-          ${jp ? `<div class="meta">Jackpot: <span class="money">${jp}</span></div>` : ``}
-          ${extras.length ? `<div class="meta">${extras.join(" · ")}</div>` : ``}
-          ${item.source ? `<div class="meta">Fuente: <a href="${item.source}" target="_blank" rel="noopener">ver</a></div>` : ``}
-        </div>
-      `;
-    }
+  return `
+    <div class="card" data-name="${(item.name || item.id || "").toLowerCase()}">
+      <div class="title">
+        <strong>${item.name || item.id}</strong>
+        <span class="meta">${item.country || ""}${item.state ? " • " + item.state : ""}</span>
+      </div>
+      <div class="meta">Fecha sorteo: ${item.date || "---"}</div>
+      <div class="balls">${ballsHtml(item.numbers)}</div>
+      ${jp ? `<div class="meta">Jackpot: <span class="money">${jp}</span></div>` : ``}
+      ${extras.length ? `<div class="meta">${extras.join(" · ")}</div>` : ``}
+    </div>
+  `;
+}
+
+
+     
 
     async function loadIndex() {
       const r = await fetch(INDEX_URL, { cache: "no-store" });
@@ -154,9 +156,9 @@
         const dates = Array.isArray(idx.dates) ? idx.dates : [];
 
         const sel = document.getElementById("dateSelect");
-        sel.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join("");
+sel.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join("");
 
-        const params = new URLSearchParams(location.search);
+const params = new URLSearchParams(location.search);
 const paramDate = params.get("date");
 
 const initial = (paramDate && dates.includes(paramDate))
@@ -164,6 +166,10 @@ const initial = (paramDate && dates.includes(paramDate))
   : (dates[0] || new Date().toISOString().slice(0,10));
 
 sel.value = initial;
+
+sel.addEventListener("change", () => render(sel.value));
+document.getElementById("search").addEventListener("input", applySearch);
+
 await render(initial);
 
         
