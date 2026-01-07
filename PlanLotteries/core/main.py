@@ -27,6 +27,24 @@ def write_json(path: str, payload: dict) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
 
+def list_result_dates(results_dir: str) -> list[str]:
+    dates = []
+    for name in os.listdir(results_dir):
+        if name.endswith(".json") and name not in ("latest.json", "seed.json", "index.json"):
+            # Espera nombre YYYY-MM-DD.json
+            base = name[:-5]
+            if len(base) == 10 and base[4] == "-" and base[7] == "-":
+                dates.append(base)
+    dates.sort(reverse=True)
+    return dates
+
+
+def write_index(results_dir: str) -> None:
+    index_path = os.path.join(results_dir, "index.json")
+    payload = {"dates": list_result_dates(results_dir)}
+    write_json(index_path, payload)
+
+
 
 def run_scrapers():
     scrapers = [powerball, megamillions]
@@ -74,6 +92,11 @@ def main():
     # “Último” (para el frontend)
     latest_path = os.path.join(results_dir, "latest.json")
     write_json(latest_path, payload)
+
+    # Índice para el historial (frontend)
+    write_index(results_dir)
+    print(f"OK -> {os.path.join(results_dir, 'index.json')}")
+
 
     print(f"OK -> {dated_path}")
     print(f"OK -> {latest_path}")

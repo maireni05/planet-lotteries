@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Historial — Planet Lotteries</title>
+  <style>
+    :root { --border:#e7e7e7; --muted:#666; }
+    body { font-family: system-ui, Arial, sans-serif; margin:0; background:#fafafa; color:#111; }
+    header { padding:22px 18px; background:#fff; border-bottom:1px solid var(--border); }
+    .wrap { max-width: 980px; margin:0 auto; padding:18px; }
+    h1 { margin:0; font-size:20px; }
+    .sub { margin:6px 0 0; color:var(--muted); font-size:13px; }
+
+    .bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin: 14px 0 18px; }
+    select, input {
+      padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; font-size:14px;
+    }
+    .btn {
+      display:inline-block; padding:10px 12px; border:1px solid var(--border);
+      border-radius:10px; background:#fff; text-decoration:none; color:#111; font-size:14px;
+    }
+    .btn:hover { background:#f5f5f5; }
+
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap:12px; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .title { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+    .title strong { font-size:16px; }
+    .meta { color:var(--muted); font-size:12px; margin-top:4px; }
+    .balls { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 8px; }
+    .ball {
+      width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+      border:1px solid var(--border); font-weight:700; background:#fff;
+    }
+    .ball.red { border-color:#ffb3b3; }
+    .money { font-weight:700; }
+    .error { color:#b00020; font-weight:600; }
+
+    footer { margin: 26px 0 10px; text-align:center; color:#777; font-size:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Historial</h1>
+      <div class="sub">Selecciona una fecha para ver resultados guardados.</div>
+
+      <div class="bar">
+        <a class="btn" href="./index.html">🏠 Home</a>
+        <a class="btn" href="./calendar.html">🗓️ Calendario</a>
+
+        <label style="display:flex; gap:10px; align-items:center;">
+          <span style="color:var(--muted); font-size:13px;">Fecha:</span>
+          <select id="dateSelect"></select>
+        </label>
+
+        <input id="search" type="search" placeholder="Buscar lotería (ej: Powerball, Leidsa…)" />
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="sub">Mostrando: <strong id="showing">---</strong></div>
+    <div style="height:10px"></div>
+    <div class="grid" id="grid"></div>
+
+    <footer>
+      © 2026 <strong>Planet Lotteries</strong> — All rights reserved.<br>
+      Licensed under AGPL-3.0 · Unauthorized commercial use prohibited.
+    </footer>
+  </main>
+
+  <script>
+    const INDEX_URL = "../data/results/index.json";
+
+    function money(amount, currency) {
+      if (amount == null) return null;
+      try {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: currency || "USD",
+          maximumFractionDigits: 0
+        }).format(amount);
+      } catch {
+        return `${amount} ${currency || ""}`.trim();
+      }
+    }
+
+    function ballsHtml(nums) {
+      if (!Array.isArray(nums) || nums.length === 0) return `<span class="error">Sin datos</span>`;
+      return nums.map((n, i) => `<span class="ball ${i === nums.length-1 ? "red": ""}">${n}</span>`).join("");
+    }
+
+    function cardHtml(item) {
+      const jp = item.jackpot ? money(item.jackpot.amount, item.jackpot.currency) : null;
+
+      const extras = [];
+      if (item.extra) {
+        if (item.extra.powerplay) extras.push(`Power Play: <b>${item.extra.powerplay}</b>`);
+        if (item.extra.next_draw_date) extras.push(`Próximo: <b>${item.extra.next_draw_date}</b>`);
+        if (item.extra.multipliers_available) extras.push(`Megaplier: <b>${item.extra.multipliers_available}</b>`);
+      }
+
+      return `
+        <div class="card" data-name="${(item.name || item.id || "").toLowerCase()}">
+          <div class="title">
+            <strong>${item.name || item.id}</strong>
+            <span class="meta">${item.country || ""}${item.state ? " • " + item.state : ""}</span>
+          </div>
+          <div class="meta">Fecha sorteo: ${item.date || "---"}</div>
+          <div class="balls">${ballsHtml(item.numbers)}</div>
+          ${jp ? `<div class="meta">Jackpot: <span class="money">${jp}</span></div>` : ``}
+          ${extras.length ? `<div class="meta">${extras.join(" · ")}</div>` : ``}
+          ${item.source ? `<div class="meta">Fuente: <a href="${item.source}" target="_blank" rel="noopener">ver</a></div>` : ``}
+        </div>
+      `;
+    }
+
+    async function loadIndex() {
+      const r = await fetch(INDEX_URL, { cache: "no-store" });
+      if (!r.ok) throw new Error("No se pudo cargar index.json");
+      return await r.json();
+    }
+
+    async function loadDate(date) {
+      const url = `../data/results/${date}.json`;
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("No se pudo cargar " + url);
+      return await r.json();
+    }
+
+    function applySearch() {
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      document.querySelectorAll("#grid .card").forEach(card => {
+        const name = card.getAttribute("data-name") || "";
+        card.style.display = (!q || name.includes(q)) ? "" : "none";
+      });
+    }
+
+    async function render(date) {
+      const data = await loadDate(date);
+      document.getElementById("showing").textContent = date;
+
+      const items = Array.isArray(data.lotteries) ? data.lotteries : [];
+      const grid = document.getElementById("grid");
+      grid.innerHTML = items.map(cardHtml).join("") || `<div class="error">No hay resultados para esta fecha.</div>`;
+
+      applySearch();
+    }
+
+    (async () => {
+      try {
+        const idx = await loadIndex();
+        const dates = Array.isArray(idx.dates) ? idx.dates : [];
+
+        const sel = document.getElementById("dateSelect");
+        sel.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join("");
+
+        const initial = dates[0] || new Date().toISOString().slice(0,10);
+        sel.value = initial;
+
+        sel.addEventListener("change", () => render(sel.value));
+        document.getElementById("search").addEventListener("input", applySearch);
+
+        await render(initial);
+      } catch (e) {
+        document.getElementById("grid").innerHTML = `<div class="error">${e.message}</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>
