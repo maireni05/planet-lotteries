@@ -5,48 +5,91 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Planet Lotteries</title>
   <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-    .card { border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; }
-    .title { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
-    .muted { color: #666; margin: 0 0 12px; }
-    .nums { font-size: 18px; font-weight: 600; }
-    .error { color: #b00020; }
-    a { color: inherit; }
+    :root { --border:#e7e7e7; --muted:#666; }
+    body { font-family: system-ui, Arial, sans-serif; margin: 0; background:#fafafa; color:#111; }
+    header { padding: 22px 18px; background:#fff; border-bottom:1px solid var(--border); }
+    h1 { margin:0; font-size:22px; }
+    .sub { margin:6px 0 0; color:var(--muted); font-size:13px; }
+
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px; }
+    .topbar { display:flex; gap:10px; flex-wrap:wrap; margin: 10px 0 18px; }
+    .btn {
+      display:inline-block; padding:10px 12px; border:1px solid var(--border);
+      border-radius:10px; background:#fff; text-decoration:none; color:#111; font-size:14px;
+    }
+    .btn:hover { background:#f5f5f5; }
+
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:14px; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px; }
+    .title { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:0 0 10px; }
+    .title h2 { margin:0; font-size:18px; }
+    .tag { font-size:12px; color:var(--muted); }
+    .row { margin: 8px 0; color: var(--muted); font-size: 13px; }
+
+    .balls { display:flex; gap:8px; flex-wrap:wrap; margin: 12px 0; }
+    .ball {
+      width:40px; height:40px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+      border:1px solid var(--border); font-weight:700;
+      background:#fff;
+    }
+    .ball.red { border-color:#ffb3b3; }
+    .money { font-weight:700; color:#111; }
+    .error { color:#b00020; font-weight:600; }
+
+    footer { margin: 26px 0 10px; text-align:center; color:#777; font-size:12px; }
+    code { background:#f1f1f1; padding:2px 6px; border-radius:6px; }
   </style>
 </head>
 <body>
-  <h1>Planet Lotteries</h1>
-  <p class="muted">
-    Última actualización: <span id="updated">---</span>
-  </p>
+  <header>
+    <div class="wrap">
+      <h1>Planet Lotteries</h1>
+      <div class="sub">Última actualización: <span id="updated">---</span></div>
+      <div class="topbar">
+        <a class="btn" href="./history.html">📜 Historial</a>
+        <a class="btn" href="./calendar.html">🗓️ Calendario</a>
+      </div>
+    </div>
+  </header>
 
-  <div class="grid">
-    <div class="card" id="powerball-card">
-      <p class="title">Powerball</p>
-      <p class="muted" id="powerball-date">Fecha: ---</p>
-      <p class="nums" id="powerball-nums">Cargando...</p>
-      <p class="muted" id="powerball-jackpot"></p>
-      <p class="muted" id="powerball-source"></p>
+  <main class="wrap">
+    <div class="grid">
+      <div class="card" id="powerball-card">
+        <div class="title">
+          <h2>Powerball</h2>
+          <span class="tag">USA • National</span>
+        </div>
+        <div class="row" id="powerball-date">Fecha: ---</div>
+        <div class="balls" id="powerball-balls"></div>
+        <div class="row" id="powerball-extra"></div>
+        <div class="row" id="powerball-jackpot"></div>
+        <div class="row" id="powerball-source"></div>
+      </div>
+
+      <div class="card" id="mega-card">
+        <div class="title">
+          <h2>Mega Millions</h2>
+          <span class="tag">USA • National</span>
+        </div>
+        <div class="row" id="mega-date">Fecha: ---</div>
+        <div class="balls" id="mega-balls"></div>
+        <div class="row" id="mega-extra"></div>
+        <div class="row" id="mega-jackpot"></div>
+        <div class="row" id="mega-source"></div>
+      </div>
     </div>
 
-    <div class="card" id="mega-card">
-      <p class="title">Mega Millions</p>
-      <p class="muted" id="mega-date">Fecha: ---</p>
-      <p class="nums" id="mega-nums">Cargando...</p>
-      <p class="muted" id="mega-jackpot"></p>
-      <p class="muted" id="mega-source"></p>
-    </div>
-  </div>
+    <footer>
+      © 2026 <strong>Planet Lotteries</strong> — All rights reserved.<br>
+      Licensed under AGPL-3.0 · Unauthorized commercial use prohibited.
+    </footer>
+  </main>
 
   <script>
-    // Como tu GitHub Pages va a servir desde /PlanLotteries,
-    // index.html está en /web, entonces subimos 1 nivel:
-    // /web -> /data/results/latest.json
     const DATA_URL = "../data/results/latest.json";
 
     function money(amount, currency) {
-      if (amount == null) return "";
+      if (amount == null) return null;
       try {
         return new Intl.NumberFormat("en-US", {
           style: "currency",
@@ -63,32 +106,54 @@
       if (el) el.textContent = text;
     }
 
-    function renderCard(prefix, item, fallbackTitle) {
-      if (item.error) {
-        setText(prefix + "-nums", "Error cargando datos");
-        const card = document.getElementById(prefix + "-card");
-        if (card) card.classList.add("error");
+    function setHtml(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
+
+    function renderBalls(containerId, numbers) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+
+      el.innerHTML = "";
+      if (!Array.isArray(numbers) || numbers.length === 0) {
+        el.innerHTML = `<span class="error">Sin datos aún</span>`;
         return;
       }
 
-      const title = item.name || fallbackTitle;
-      const date = item.date || "---";
-      const nums = Array.isArray(item.numbers) ? item.numbers.join(", ") : "";
-      const extra = item.extra && Object.keys(item.extra).length
-        ? " | Extra: " + JSON.stringify(item.extra)
-        : "";
+      numbers.forEach((n, idx) => {
+        const div = document.createElement("div");
+        div.className = "ball" + (idx === numbers.length - 1 ? " red" : "");
+        div.textContent = n;
+        el.appendChild(div);
+      });
+    }
 
-      setText(prefix + "-date", `Fecha: ${date}`);
-      setText(prefix + "-nums", nums ? (`${nums}${extra}`) : "Sin datos aún");
+    function render(prefix, item, fallbackName) {
+      if (!item || item.error) {
+        setText(prefix + "-date", "Error cargando datos");
+        setHtml(prefix + "-balls", `<span class="error">No se pudo cargar</span>`);
+        return;
+      }
 
-      const jackpot = item.jackpot ? money(item.jackpot.amount, item.jackpot.currency) : "";
-      setText(prefix + "-jackpot", jackpot ? `Jackpot: ${jackpot}` : "");
+      setText(prefix + "-date", `Fecha: ${item.date || "---"}`);
+      renderBalls(prefix + "-balls", item.numbers);
+
+      const parts = [];
+      if (item.extra) {
+        if (item.extra.powerplay) parts.push(`Power Play: <b>${item.extra.powerplay}</b>`);
+        if (item.extra.next_draw_date) parts.push(`Próximo sorteo: <b>${item.extra.next_draw_date}</b>`);
+        if (item.extra.multipliers_available) parts.push(`Megaplier: <b>${item.extra.multipliers_available}</b>`);
+      }
+      setHtml(prefix + "-extra", parts.length ? parts.join(" · ") : "");
+
+      const jp = item.jackpot ? money(item.jackpot.amount, item.jackpot.currency) : null;
+      setHtml(prefix + "-jackpot", jp ? `Jackpot: <span class="money">${jp}</span>` : "");
 
       if (item.source) {
-        document.getElementById(prefix + "-source").innerHTML =
-          `Fuente: <a href="${item.source}" target="_blank" rel="noopener">${item.source}</a>`;
+        setHtml(prefix + "-source", `Fuente: <a href="${item.source}" target="_blank" rel="noopener">${item.source}</a>`);
       } else {
-        setText(prefix + "-source", "");
+        setHtml(prefix + "-source", "");
       }
     }
 
@@ -96,19 +161,18 @@
       .then(r => r.json())
       .then(data => {
         setText("updated", data.updated_at || "---");
-
         const items = Array.isArray(data.lotteries) ? data.lotteries : [];
 
-        const powerball = items.find(x => x.id === "powerball") || {};
-        const mega = items.find(x => x.id === "megamillions") || {};
+        const powerball = items.find(x => x.id === "powerball");
+        const mega = items.find(x => x.id === "megamillions");
 
-        renderCard("powerball", powerball, "Powerball");
-        renderCard("mega", mega, "Mega Millions");
+        render("powerball", powerball, "Powerball");
+        render("mega", mega, "Mega Millions");
       })
       .catch(() => {
         setText("updated", "Error");
-        setText("powerball-nums", "No se pudo cargar latest.json");
-        setText("mega-nums", "No se pudo cargar latest.json");
+        setHtml("powerball-balls", `<span class="error">No se pudo cargar latest.json</span>`);
+        setHtml("mega-balls", `<span class="error">No se pudo cargar latest.json</span>`);
       });
   </script>
 </body>
