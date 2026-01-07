@@ -1,56 +1,24 @@
-import json
 import re
 from datetime import datetime
 from typing import Any, Dict, Optional
 
 import requests
+from bs4 import BeautifulSoup
+
+SOURCE_URL = "https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/index.html"
 
 
-# Endpoint que devuelve el último sorteo (números + fecha) en un payload tipo JSON
-LATEST_URL = "https://www.megamillions.com/cmspages/utilservice.asmx/GetLatestDrawData"
-FALLBACK_SITE = "https://www.megamillions.com/"
-
-
-def _safe_json_from_response(text: str) -> Optional[dict]:
-    """
-    Algunos .asmx devuelven JSON directo, otros devuelven un wrapper.
-    Este helper intenta extraer el primer objeto JSON {...}.
-    """
-    text = text.strip()
-
-    # Caso 1: JSON puro
-    try:
-        return json.loads(text)
-    except Exception:
-        pass
-
-    # Caso 2: extraer substring JSON
-    start = text.find("{")
-    end = text.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        try:
-            return json.loads(text[start : end + 1])
-        except Exception:
-            return None
-
-    return None
-
-
-def _parse_money_to_int(maybe_money: Any) -> Optional[int]:
-    """
-    Mega Millions a veces trae jackpot como número o string. Maneja ambos.
-    """
-    if maybe_money is None:
+def _parse_us_money_to_int(text: str) -> Optional[int]:
+    if not text:
         return None
-    if isinstance(maybe_money, (int, float)):
-        return int(maybe_money)
-
-    s = str(maybe_money).strip()
-    m = re.search(r"\$?\s*([\d.,]+)\s*(Million|Billion)?", s, re.IGNORECASE)
+    t = text.strip()
+    m = re.search(r"\$?\s*([\d.,]+)\s*(Million|Billion)?", t, re.IGNORECASE)
     if not m:
         return None
+
     num = float(m.group(1).replace(",", ""))
     unit = (m.group(2) or "").lower()
+
     if unit == "billion":
         return int(num * 1_000_000_000)
     if unit == "million":
@@ -59,51 +27,73 @@ def _parse_money_to_int(maybe_money: Any) -> Optional[int]:
 
 
 def fetch() -> Dict[str, Any]:
+    """
+    Devuelve:
+      numbers = [w1,w2,w3,w4,w5,megaball]
+      extra.multipliers_available = "2X, 3X, 4X, 5X or 10X" (si aparece)
+      jackpot.amount = próximo jackpot estimado (USD int), si aparece
+      extra.next_draw_date = YYYY-MM-DD (si aparece)
+    """
     try:
-        r = requests.get(LATEST_URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+        r = requests.get(SOURCE_URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
         r.raise_for_status()
 
-        payload = _safe_json_from_response(r.text) or {}
-        # En muchos casos viene algo como {"Drawing": {...}, "Jackpot": {...}} o similar
-        drawing = payload.get("Drawing") or payload.get("d") or payload
+        soup = BeautifulSoup(r.text, "html.parser")
+        text = soup.get_text("\n", strip=True)
 
-        # Campos típicos vistos en ese servicio:
-        # PlayDate: "2026-01-02T00:00:00"
-        play_date = drawing.get("PlayDate") if isinstance(drawing, dict) else None
-        draw_iso = None
-        if play_date:
-            dt = datetime.fromisoformat(play_date.replace("Z", ""))
-            draw_iso = dt.strftime("%Y-%m-%d")
+        # --- Último sorteo + números ---
+        # Texto típico: "Mega Millions Winning Numbers for 01/02/2026 are: 6 13 34 43 52 4"
+        m_draw = re.search(
+            r"Mega Millions Winning Numbers for\s+(\d{2}/\d{2}/\d{4})\s+are:\s*"
+            r"(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})",
+            text,
+            re.IGNORECASE,
+        )
 
-        # N1..N5 y MBall
-        nums = []
-        if isinstance(drawing, dict):
-            keys = ["N1", "N2", "N3", "N4", "N5"]
-            if all(k in drawing for k in keys) and "MBall" in drawing:
-                nums = [int(drawing[k]) for k in keys] + [int(drawing["MBall"])]
+        draw_date_iso = None
+        numbers = []
 
-        # Jackpot (si viene)
+        if m_draw:
+            dt = datetime.strptime(m_draw.group(1), "%m/%d/%Y")
+            draw_date_iso = dt.strftime("%Y-%m-%d")
+            numbers = [int(m_draw.group(i)) for i in range(2, 8)]
+
+        # --- Próximo jackpot y fecha ---
+        # Texto típico:
+        # "Current Est. Annuitized Jackpot for 01/06/2026: $180 Million"
+        m_next = re.search(
+            r"Current Est\. Annuitized Jackpot for\s+(\d{2}/\d{2}/\d{4})\s*:\s*\$?([0-9][\d.,]*\s*(?:Million|Billion)?)",
+            text,
+            re.IGNORECASE,
+        )
+
+        next_draw_iso = None
         jackpot_amount = None
-        # algunos payloads traen "Jackpot" arriba
-        jp = payload.get("Jackpot") if isinstance(payload, dict) else None
-        if isinstance(jp, dict):
-            jackpot_amount = _parse_money_to_int(jp.get("NextJackpot") or jp.get("Jackpot") or jp.get("Amount"))
-        else:
-            # a veces viene como campo directo
-            jackpot_amount = _parse_money_to_int(payload.get("NextJackpot") if isinstance(payload, dict) else None)
+        if m_next:
+            ndt = datetime.strptime(m_next.group(1), "%m/%d/%Y")
+            next_draw_iso = ndt.strftime("%Y-%m-%d")
+            jackpot_amount = _parse_us_money_to_int(m_next.group(2))
+
+        # --- Multiplicadores disponibles (suele aparecer en "Past Winning Numbers" / tabla) ---
+        # En la página /Winning_Numbers también aparece "2X, 3X, 4X, 5X or 10X" :contentReference[oaicite:2]{index=2}
+        m_mult = re.search(r"\b(2X,\s*3X,\s*4X,\s*5X\s*or\s*10X)\b", text, re.IGNORECASE)
+
+        extra: Dict[str, Any] = {}
+        if next_draw_iso:
+            extra["next_draw_date"] = next_draw_iso
+        if m_mult:
+            extra["multipliers_available"] = m_mult.group(1)
 
         return {
             "id": "megamillions",
             "country": "US",
             "state": "NATIONAL",
             "name": "Mega Millions",
-            "date": draw_iso,
-            "numbers": nums,  # [w1,w2,w3,w4,w5,megaball]
-            "extra": {
-                "megamultiplier": (drawing.get("Megaplier") if isinstance(drawing, dict) else None),
-            },
+            "date": draw_date_iso,
+            "numbers": numbers,
+            "extra": extra,
             "jackpot": {"amount": jackpot_amount, "currency": "USD"},
-            "source": LATEST_URL,
+            "source": SOURCE_URL,
         }
 
     except Exception:
@@ -116,5 +106,5 @@ def fetch() -> Dict[str, Any]:
             "numbers": [],
             "extra": {},
             "jackpot": {"amount": None, "currency": "USD"},
-            "source": FALLBACK_SITE,
+            "source": SOURCE_URL,
         }
