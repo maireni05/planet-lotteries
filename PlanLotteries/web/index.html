@@ -150,12 +150,8 @@
       const jp = item.jackpot ? money(item.jackpot.amount, item.jackpot.currency) : null;
       setHtml(prefix + "-jackpot", jp ? `Jackpot: <span class="money">${jp}</span>` : "");
 
-      if (item.source) {
-        setHtml(prefix + "-source", `Fuente: <a href="${item.source}" target="_blank" rel="noopener">${item.source}</a>`);
-      } else {
-        setHtml(prefix + "-source", "");
-      }
-    }
+          setHtml(prefix + "-source", "");
+    } // ✅ cierre de render()
 
     fetch(DATA_URL, { cache: "no-store" })
       .then(r => r.json())
