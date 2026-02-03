@@ -1,6 +1,6 @@
 {
   "date": "2026-02-03",
-  "updated_at": "2026-02-03T07:08:42Z",
+  "updated_at": "2026-02-03T07:52:50Z",
   "lotteries": [
     {
       "id": "powerball",
@@ -24,7 +24,7 @@
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Powerball/index.html",
-      "updated_at": "2026-02-03T07:08:47Z"
+      "updated_at": "2026-02-03T07:52:50Z"
     },
     {
       "id": "megamillions",
@@ -49,7 +49,7 @@
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/index.html",
-      "updated_at": "2026-02-03T07:08:47Z"
+      "updated_at": "2026-02-03T07:52:50Z"
     }
   ]
 }
