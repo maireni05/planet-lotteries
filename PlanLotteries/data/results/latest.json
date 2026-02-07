@@ -1,6 +1,6 @@
 {
   "date": "2026-02-07",
-  "updated_at": "2026-02-07T05:34:39Z",
+  "updated_at": "2026-02-07T06:07:04Z",
   "lotteries": [
     {
       "id": "powerball",
@@ -24,7 +24,7 @@
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Powerball/index.html",
-      "updated_at": "2026-02-07T05:34:39Z"
+      "updated_at": "2026-02-07T06:07:05Z"
     },
     {
       "id": "megamillions",
@@ -41,15 +41,15 @@
         19
       ],
       "extra": {
-        "next_draw_date": "2026-02-06",
+        "next_draw_date": "2026-02-10",
         "multipliers_available": "2X, 3X, 4X, 5X or 10X"
       },
       "jackpot": {
-        "amount": 346000000,
+        "amount": 366000000,
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/index.html",
-      "updated_at": "2026-02-07T05:34:39Z"
+      "updated_at": "2026-02-07T06:07:05Z"
     }
   ]
 }
