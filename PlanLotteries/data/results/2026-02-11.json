@@ -1,21 +1,30 @@
 {
   "date": "2026-02-11",
-  "updated_at": "2026-02-11T10:32:20Z",
+  "updated_at": "2026-02-11T11:29:49Z",
   "lotteries": [
     {
       "id": "powerball",
       "country": "US",
       "state": "NATIONAL",
       "name": "Powerball",
-      "date": null,
-      "numbers": [],
-      "extra": {},
+      "date": "2026-02-09",
+      "numbers": [
+        6,
+        19,
+        22,
+        28,
+        48,
+        24
+      ],
+      "extra": {
+        "powerplay": "5"
+      },
       "jackpot": {
-        "amount": null,
+        "amount": 113000000,
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Powerball/index.html",
-      "updated_at": "2026-02-11T10:32:51Z"
+      "updated_at": "2026-02-11T11:29:50Z"
     },
     {
       "id": "megamillions",
@@ -40,7 +49,7 @@
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/index.html",
-      "updated_at": "2026-02-11T10:32:51Z"
+      "updated_at": "2026-02-11T11:29:50Z"
     }
   ]
 }
