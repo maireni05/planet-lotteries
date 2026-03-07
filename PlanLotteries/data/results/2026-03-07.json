@@ -1,6 +1,6 @@
 {
   "date": "2026-03-07",
-  "updated_at": "2026-03-07T03:24:09Z",
+  "updated_at": "2026-03-07T04:43:53Z",
   "lotteries": [
     {
       "id": "powerball",
@@ -24,21 +24,21 @@
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Powerball/index.html",
-      "updated_at": "2026-03-07T03:24:10Z"
+      "updated_at": "2026-03-07T04:43:53Z"
     },
     {
       "id": "megamillions",
       "country": "US",
       "state": "NATIONAL",
       "name": "Mega Millions",
-      "date": "2026-03-03",
+      "date": "2026-03-06",
       "numbers": [
-        7,
-        21,
-        53,
-        54,
-        62,
-        16
+        8,
+        19,
+        26,
+        38,
+        42,
+        24
       ],
       "extra": {
         "next_draw_date": "2026-03-06",
@@ -49,7 +49,7 @@
         "currency": "USD"
       },
       "source": "https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/index.html",
-      "updated_at": "2026-03-07T03:24:10Z"
+      "updated_at": "2026-03-07T04:43:54Z"
     }
   ]
 }
