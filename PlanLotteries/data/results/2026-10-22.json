@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-22",
+  "updated_at": "2026-10-22T01:17:04Z",
+  "lotteries": [
+    {
+      "id": "powerball",
+      "country": "US",
+      "state": "NATIONAL",
+      "name": "Powerball",
+      "date": "2026-10-19",
+      "numbers": [
+        8,
+        31,
+        32,
+        42,
+        48,
+        23
+      ],
+      "extra": {
+        "powerplay": "4"
+      },
+      "jackpot": {
+        "amount": 607000000,
+        "currency": "USD"
+      },
+      "source": "https://www.texaslottery.com/export/sites/lottery/Games/Powerball/index.html",
+      "updated_at": "2026-10-22T01:17:04Z"
+    },
+    {
+      "id": "megamillions",
+      "country": "US",
+      "state": "NATIONAL",
+      "name": "Mega Millions",
+      "date": "2026-10-20",
+      "numbers": [
+        13,
+        28,
+        33,
+        35,
+        48,
+        3
+      ],
+      "extra": {
+        "next_draw_date": "2026-10-23",
+        "multipliers_available": "2X, 3X, 4X, 5X or 10X"
+      },
+      "jackpot": {
+        "amount": 433000000,
+        "currency": "USD"
+      },
+      "source": "https://www.texaslottery.com/export/sites/lottery/Games/Mega_Millions/index.html",
+      "updated_at": "2026-10-22T01:17:04Z"
+    }
+  ]
+}
